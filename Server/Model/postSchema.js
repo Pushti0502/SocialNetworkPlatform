@@ -1,42 +1,53 @@
-const mongoose =require('mongoose')
+const mongoose = require('mongoose');
+const { z } = require('zod');
+const post = z.object({
+    title: z.string().optional(),
+    content: z.string().optional(),
+    createdBy: z.string().optional(),
+
+    selectedFile: z.string().optional(),
+    likes: z.array(z.string()).optional(),
+    comments: z.array(z.string()).optional(),
+    createdAt: z.date(),
+});
 
 const postSchema = mongoose.Schema({
     title: {
         type: String,
-        required: true,
-    }, 
+       
+    },
     content: {
         type: String,
-        required: true,
+       
     },
     createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-   
+        type: String,
     },
-    tags: {
-        type: [String],
-        default: [],
-    },
+
     selectedFile: {
-        type: [String],
-        default: [],
+        type: String,
     },
     likes: {
-        type: [String], 
+        type: [],
         default: [],
     },
     comments: {
-        type: [String],
+        type: [],
         default: [],
     },
     createdAt: {
         type: Date,
-        default: new Date()
+        default: new Date(),
     },
-    
+});
+postSchema.pre('save', async function () {
+    try {
+        post.parse(this.toObject());
+    } catch (error) {
+        console.log(error);
+    }
 });
 
 const Post = mongoose.model('Post', postSchema);
 
-module.exports =Post
+module.exports = Post;

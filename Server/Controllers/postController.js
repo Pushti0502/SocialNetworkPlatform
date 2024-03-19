@@ -1,129 +1,271 @@
 const Post = require('../Model/postSchema.js');
-const User =require('../Model/userSchema.js')
+const { User } = require('../Model/userSchema.js');
+const { z } = require('zod');
+const multer = require('multer');
 
-const multer =require('multer')
+const createPostSchema = z.object({
+    title: z.string().optional(),
+    content: z.string().optional(),
+    selectedFile: z.array(z.string()).optional(),
+    createdBy: z.string().optional(),
+    createdAt: z.date().optional(),
+    comments: z.array(z.string()).optional(),
+});
+const updatePostSchema = z.object({
+    title: z.string().optional(),
+    content: z.string().optional(),
+    selectedFile: z.array(z.string()).optional(),
+    comments: z.array(z.string()).optional(),
+});
 
-const imageUpload= () =>{
+const idSchema = z.object({
+    id: z.string(),
+});
+const userIdSchema = z.object({
+    userId: z.string(),
+});
+const commentPostSchema = z.object({
+    comment: z.string(),
+    id: z.string(),
+});
+
+const imageUpload = () => {
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
-          cb(null, '../../client/public/uploads')
+            cb(null, 'uploads/');
         },
-        filename: function (file, cb) {
-          
-          cb(null, Date.now() + '-' + file.originalname)
-        }
-      })
-      
-    const upload = multer({ storage: storage })
+        filename: function (req, file, cb) {
+            cb(null, Date.now() + '-' + file.originalname);
+        },
+    });
+
+    const upload = multer({ storage: storage });
     return upload;
-}
-
-
+};
 
 const createPost = async (req, res) => {
     try {
-        const { title, content, tags, selectedFile, createdBy} = req.body;
-        const selectedFiles = req.files
-        if(!(title && content)){
-            res.status(400).json({message:"Required data not available"})
-        }
-        const newPost = new Post({
+        const { title, content, comments, createdBy, likes } =
+            createPostSchema.parse(req.body);
+            let selectedFile=''
+            if (req.file && req.file.path) {
+                selectedFile = req.file.path;
+            }
+        
+
+        const post = new Post({ 
             title,
             content,
             selectedFile,
-            tags,
+            comments,
+            likes,
             createdBy,
             createdAt: new Date().toDateString(),
         });
-        await newPost.save();
-        return res.status(200).json({message: "Post Created!!",newPost});
+        console.log(req.file);
+        await post.save();
+       
+        return res.status(200).json({ message: 'Post Created!!', post });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: 'Validation errror' });
+        } else {
+            res.status(500).json({
+                message: 'Internal server error',
+                error: error.message,
+            });
+        }
     }
 };
 
-
- const getPosts = async (req, res) => {
+const getPosts = async (req, res) => {
     try {
         const Posts = await Post.find();
-        res.status(200).json(Posts);
+        res.status(200).json({ message: 'Post Fetched Succcessfully', Posts });
     } catch (error) {
-        res.status(404).json({ message: error.message });
+        res.status(500).json({
+            message: 'Internal Server Error',
+            error: error.message,
+        });
     }
 };
 
- const getPostsBySearch = async (req, res) => {
- 
+const getPostById = async (req, res) => {
+    const { userId } = req.params;
     try {
-        const { query } = req.query;
-        const posts = await Post.find({
-            $or: [
-                { title: { $regex: query, $options: 'i' } }, 
-               
-            ]
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const followedUserIds = [userId, ...user.following];
+
+        const posts = await Post.find({ createdBy: { $in: followedUserIds } });
+
+        if (!posts || posts.length === 0) {
+            return res.status(404).json({ message: 'Could not find posts' });
+        }
+
+        res.status(200).json(posts);
+    } catch (error) {
+        res.status(500).json({
+            message: 'Internal server Error ',
+            error: error.message,
+        });
+    }
+};
+
+const updatePost = async (req, res) => {
+    const { id } = req.params;
+
+    const updatedFields = req.body;
+    try {
+        updatePostSchema.parse(updatedFields);
+        idSchema.parse({ id });
+        const updatedPost = await Post.findByIdAndUpdate(id, updatedFields, {
+            new: true,
         });
 
-        if (posts.length === 0) {
-            return res.status(404).json({ message: 'No posts found matching the search query' });
+        if (!updatedPost) {
+            return res.status(404).json({ message: 'Not found' });
         }
-
-        res.status(200).json({ message: 'Posts found', posts });
+        res.status(200).json({
+            message: 'Post Updated Successfully',
+            updatePost,
+        });
     } catch (error) {
-        res.status(404).json({ message: error.message });
-    }
-};
-
- const getPostById = async (req, res) => {
-    const userId = req.params.userId; 
-
-    try {
-        const post = await Post.find({createdBy: userId})
-        if (!post)
-            return res.status(404).json({ message: 'Could not find post' });
-        res.status(200).json(post);
-    } catch (error) {
-        res.status(404).json({ message: error.message });
-    }
-};
- const updatePost = async (req, res) => {
-    try {
-        const { id } = req.params;
-       
-        const { title, content, tags, selectedFile } = req.body;
-
-        const updatedPost = await Post.findByIdAndUpdate({_id:id}, {
-            title,
-            content,
-            tags,
-            selectedFile,
-        },); 
-
-        if(!updatedPost){
-            res.status(400).json({message:"Not found"})
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({ message: 'Validation errror' });
+        } else {
+            res.status(500).json({
+                message: 'Internal server error',
+                error: error.message,
+            });
         }
-        return res.status(200).json({message:"Post Updated Successfully",updatePost})
-    } catch (error) {
-        res.status(500).send({ message: error.message });
     }
 };
 const deletePost = async (req, res) => {
+    const { id } = req.params;
     try {
-        const { id } = req.params;
-      const deletedPost = await Post.findOneAndDelete({_id:id})
-      if(!deletedPost){
-        return res.status(400).json({ message:"Post not Found"})
-      }
+        idSchema.parse({ id });
+        const deletedPost = await Post.findOneAndDelete({ _id: id });
+        if (!deletedPost) {
+            return res.status(400).json({ message: 'Post not Found' });
+        }
         return res.status(200).send({ message: 'Post deleted successfully' });
     } catch (error) {
-        res.status(500).send({ message: error.message });
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: 'Validation errror' });
+        } else {
+            res.status(500).json({
+                message: 'Internal server error',
+                error: error.message,
+            });
+        }
     }
 };
+
+const commentPost = async (req, res) => {
+    const { id } = req.params;
+    const { comment } = req.body;
+
+    try {
+        commentPostSchema.parse({ id, comment });
+        const post = await Post.findByIdAndUpdate(
+            id,
+            { $push: { comments: comment } },
+            { new: true }
+        );
+
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        res.status(200).json({ message: 'Comment added successfully', post });
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: 'Validation errror' });
+        } else {
+            res.status(500).json({
+                message: 'Internal server error',
+                error: error.message,
+            });
+        }
+    }
+};
+
+const getComments = async (req, res) => {
+    const { id } = req.params;
+    try {
+        idSchema.parse({ id });
+        const post = await Post.findById(id);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        const comments = post.comments;
+        res.status(200).json({
+            message: 'Comments fetched successfully',
+            comments,
+        });
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: 'Validation errror' });
+        } else {
+            res.status(500).json({
+                message: 'Internal server error',
+                error: error.message,
+            });
+        }
+    }
+};
+
+const likePost = async (req, res) => {
+    const { id, userId } = req.params;
+    try {
+        idSchema.parse({ id });
+        const post = await Post.findById(id);
+
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        const likedPostindex = post.likes.indexOf(userId);
+        if (likedPostindex === -1) {
+            post.likes.push(userId);
+            await post.save();
+
+            res.status(200).json({ message: 'Post Liked Successfully ', post });
+        } else {
+            post.likes.splice(likedPostindex, 1);
+            await post.save();
+
+            res.status(200).json({
+                message: 'Post UnLiked Successfully ',
+                post,
+            });
+        }
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return res
+                .status(400)
+                .json({ message: 'Validation failed', errors: error.errors });
+        } else {
+            res.status(500).json({
+                message: 'Internal server error',
+                error: error.message,
+            });
+        }
+    }
+};
+
 module.exports = {
     createPost,
     getPosts,
-    getPostsBySearch,
     getPostById,
     updatePost,
     deletePost,
-    imageUpload
+    imageUpload,
+    likePost,
+    commentPost,
+    getComments,
 };
