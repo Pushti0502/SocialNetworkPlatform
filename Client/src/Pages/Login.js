@@ -16,7 +16,9 @@ const Login = () => {
   const handleSubmit = (event) => {
    event.preventDefault();
    dispatch(logInUser(user.email,user.password))
-    navigate('/dashboard');
+   if(user){
+    navigate('/')
+   }
    
   };
   return (

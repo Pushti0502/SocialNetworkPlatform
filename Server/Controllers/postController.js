@@ -47,22 +47,20 @@ const createPost = async (req, res) => {
     try {
         const { title, content, comments, createdBy, likes } =
             createPostSchema.parse(req.body);
-            let selectedFile=''
+            let selectedfile=''
             if (req.file && req.file.path) {
-                selectedFile = req.file.path;
+                selectedfile = req.file.path;
             }
-        
-
         const post = new Post({ 
             title,
             content,
-            selectedFile,
+            selectedFile:selectedfile,
             comments,
             likes,
             createdBy,
             createdAt: new Date().toDateString(),
         });
-        console.log(req.file);
+     
         await post.save();
        
         return res.status(200).json({ message: 'Post Created!!', post });
@@ -107,7 +105,7 @@ const getPostById = async (req, res) => {
             return res.status(404).json({ message: 'Could not find posts' });
         }
 
-        res.status(200).json(posts);
+        res.status(200).json({message:"Post Get Successfully!!",posts});
     } catch (error) {
         res.status(500).json({
             message: 'Internal server Error ',
@@ -123,16 +121,16 @@ const updatePost = async (req, res) => {
     try {
         updatePostSchema.parse(updatedFields);
         idSchema.parse({ id });
-        const updatedPost = await Post.findByIdAndUpdate(id, updatedFields, {
+        const  post = await Post.findByIdAndUpdate(id, updatedFields, {
             new: true,
         });
 
-        if (!updatedPost) {
+        if (!post) {
             return res.status(404).json({ message: 'Not found' });
         }
         res.status(200).json({
             message: 'Post Updated Successfully',
-            updatePost,
+            post,
         });
     } catch (error) {
         if (error instanceof z.ZodError) {
@@ -153,7 +151,7 @@ const deletePost = async (req, res) => {
         if (!deletedPost) {
             return res.status(400).json({ message: 'Post not Found' });
         }
-        return res.status(200).send({ message: 'Post deleted successfully' });
+        return res.status(200).send({ message: 'Post deleted successfully',deletedPost });
     } catch (error) {
         if (error instanceof z.ZodError) {
             res.status(400).json({ message: 'Validation errror' });
@@ -234,13 +232,13 @@ const likePost = async (req, res) => {
             post.likes.push(userId);
             await post.save();
 
-            res.status(200).json({ message: 'Post Liked Successfully ', post });
+            res.status(200).json({ message: 'Post Liked Successfully', post });
         } else {
             post.likes.splice(likedPostindex, 1);
             await post.save();
 
             res.status(200).json({
-                message: 'Post UnLiked Successfully ',
+                message: 'Post UnLiked Successfully',
                 post,
             });
         }

@@ -120,13 +120,8 @@ export const createPost = (postData) => {
         try {
             const response = await axios
                 .post(`${BASE_URL}/post/createPost`, postData)
-                .then((response) => {
-                    console.log(response);
-                })
-                .catch((error) => {
-                    console.log(error.message);
-                });
-            const newPost = response.data;
+              
+            const newPost = response.data.post;
             dispatch(createSuccess(newPost));
         } catch (error) {
             const errorMessage = error.message;
@@ -142,7 +137,7 @@ export const getPostById = (userId) => {
             const response = await axios.get(
                 `${BASE_URL}/post/${userId}/getPostById`
             );
-            const Post = response.data;
+            const Post = response.data.posts;
             dispatch(getPostSuccess(Post));
         } catch (error) {
             const errorMessage = error.message;
@@ -158,7 +153,7 @@ export const updatePost = (id, updatedFields) => {
                 `${BASE_URL}/post/${id}/updatepost`,
                 updatedFields
             );
-            const updatedPost = response.data;
+            const updatedPost = response.data.post;
             dispatch(updatePostSuccess(updatedPost));
         } catch (error) {
             const errorMessage = error.message;

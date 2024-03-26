@@ -47,3 +47,4 @@ server.listen(port, () => {
 
 app.use('/user', authRoute);
 app.use('/post', postRoute);
+module.exports = server

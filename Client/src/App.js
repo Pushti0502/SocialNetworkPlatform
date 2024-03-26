@@ -10,8 +10,7 @@ import Error from './Components/Error';
 import SavedPost from './Pages/SavedPost';
 function App() {
     const dispatch = useDispatch();
-    const user =
-        useSelector((state) => state.user.user) || localStorage.getItem('user');
+    const user = useSelector((state) => state.user.user);
 
     return (
         <BrowserRouter>
@@ -21,7 +20,6 @@ function App() {
                 ) : (
                     <Route path="/" element={<SignUp />} />
                 )}
-
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/dashboard" element={<DashBoard />} />
                 <Route path="/signup" element={<SignUp />} />

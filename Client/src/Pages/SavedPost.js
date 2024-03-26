@@ -1,28 +1,36 @@
 import React, { useEffect } from 'react';
 import { UseDispatch, useDispatch, useSelector } from 'react-redux';
-import { getSavedPost, saveUnsavePost } from '../redux/actions/user';
+import {
+    getSavedPost,
+    getUserDataById,
+    saveUnsavePost,
+} from '../redux/actions/user';
 import { getPostById } from '../redux/actions/post';
 import axios from 'axios';
 import '../Wrappers/dashboard.css';
 const SavedPost = () => {
-    const user =
-        useSelector((state) => state.user.user) || JSON.parse(localStorage.getItem('user'));
+    const user = useSelector((state) => state.user.user);
     const savedPosts = useSelector((state) => state.user.savedPosts);
     const dispatch = useDispatch();
-    const handleUnSave =(id)=>{
-       dispatch(saveUnsavePost(id,user.user._id))
-    }
+    const handleUnSave = (id) => {
+        dispatch(saveUnsavePost(id, user.user._id));
+    };
 
     useEffect(() => {
-      
-        dispatch(getSavedPost(user.user._id));
-     
+        if (user) {
+            dispatch(getUserDataById(user._id));
+            dispatch(getSavedPost(user._id));
+        }
     }, [dispatch, user, savedPosts]);
 
     return (
         <div className="savedpost-container">
-            {savedPosts.length === 0 ?  <h1>No Saved Post</h1> : <h1>Saved Posts</h1> }
-           
+            {savedPosts.length === 0 ? (
+                <h1>No Saved Post</h1>
+            ) : (
+                <h1>Saved Posts</h1>
+            )}
+
             {savedPosts && (
                 <div className="post">
                     {savedPosts.map((item, index) => {
@@ -37,7 +45,11 @@ const SavedPost = () => {
                                         />
                                         <span>{user.user.username}</span>
                                     </div>
-                                    <button onClick={()=> handleUnSave(item._id)}>Unsave</button>
+                                    <button
+                                        onClick={() => handleUnSave(item._id)}
+                                    >
+                                        Unsave
+                                    </button>
                                 </div>
                                 <h2>{item.title}</h2>
                                 <span

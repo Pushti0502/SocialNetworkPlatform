@@ -12,10 +12,10 @@ import {
     likePost,
     updatePost,
 } from '../redux/actions/post';
-import { saveUnsavePost } from '../redux/actions/user';
+import { saveUnsavePost,getUserDataById } from '../redux/actions/user';
 const Posts = () => {
     const dispatch = useDispatch();
-    const user =JSON.parse(localStorage.getItem('user'));
+    const user =useSelector((state) => state.user.user);
 
     const [postData, setPostData] = useState({
         title: '',
@@ -33,12 +33,17 @@ const Posts = () => {
     const [isComment, setIsComment] = useState(false);
     const [comment, setComment] = useState();
     useEffect(() => {
-        dispatch(getPostById(user.user._id));
+     if(user && user._id ){
+
+        dispatch(getPostById(user._id))
+     }
+     
        
-    }, [dispatch, postdata]);
+    }, [dispatch,postdata,user]);
     const handleChange = (event) => {
         const { name, value } = event.target;
         setPostData((prevData) => ({ ...prevData, [name]: value }));
+        console.log(postData)
     };
     const handleEditChange = (event) => {
         const { name, value } = event.target;
@@ -55,7 +60,7 @@ const Posts = () => {
     };
 
     const handleLike = (id) => {
-        dispatch(likePost(user.user._id, id));
+        dispatch(likePost(user._id, id));
     };
 
     const handleEdit = (id) => {
@@ -81,7 +86,7 @@ const Posts = () => {
         dispatch(commentPost(id, comment));
     };
     const handlePostSave = (id) => {
-        dispatch(saveUnsavePost(id, user.user._id));
+        dispatch(saveUnsavePost(id, user._id));
     };
 
     const handleFileChange = async (event) => {
@@ -92,16 +97,10 @@ const Posts = () => {
     };
 
     const handleUpload = () => {
-        const formData = new FormData();
-        formData.append('title', postData.title);
-        formData.append('content', postData.content);
-        formData.append('createdBy', user.user._id);
-        formData.append('selectedFile', postData.selectedFile);
-        console.log(postData.selectedFile);
-
-        dispatch(createPost(formData));
-        handlePost();
-        setPostData({ title: ' ', content: ' ', selectedFile: '' });
+        dispatch(createPost(postData));
+      
+        handlePost(); 
+        setPostData({ title: '', content: '', selectedFile:'' });
     };
     const handledelete = (PostId) => {
         dispatch(deletePost(PostId));
@@ -194,7 +193,7 @@ const Posts = () => {
                                                     className="profile-picture"
                                                 />
                                                 <span>
-                                                    {user.user.username}
+                                                    {user.username}
                                                 </span>
                                             </div>
                                             <div className="button-container">
@@ -295,15 +294,17 @@ const Posts = () => {
                                         >
                                             {item.content}
                                         </span>
-                                        <img
-                                            src={`http://localhost:8000/${item.selectedFile}`}
-                                            alt=""
-                                            className="post-image"
-                                        />
+                                        {item.selectedFile && (
+                            <img
+                                src={`http://localhost:8000/${item.selectedFile}`}
+                                alt=""
+                                className="post-image"
+                            />
+                        )}
                                         <div className="like-container">
                                             <div className="likes">
                                                 {item.likes.includes(
-                                                    user.user._id
+                                                user._id
                                                 ) ? (
                                                     <FaHeart
                                                         size={20}

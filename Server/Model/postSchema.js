@@ -4,7 +4,6 @@ const post = z.object({
     title: z.string().optional(),
     content: z.string().optional(),
     createdBy: z.string().optional(),
-
     selectedFile: z.string().optional(),
     likes: z.array(z.string()).optional(),
     comments: z.array(z.string()).optional(),

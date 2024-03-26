@@ -5,12 +5,12 @@ import '../Wrappers/dashboard.css';
 import { MdLogout } from 'react-icons/md';
 import axios from 'axios';
 const Header = ({ logOutFunc, onSearch }) => {
-    const currentUserData = JSON.parse(localStorage.getItem('user'));
+    const user =useSelector((state) => state.user.user);
 
     const dispatch = useDispatch();
     const users =
-        useSelector((state) => state.user.user) ||
-        JSON.parse(localStorage.getItem('user'));
+        useSelector((state) => state.user.allusers) 
+      
     const handleKeyChange = (event) => {
         if (event.key === 'Enter') {
             onSearch(searchQuery);
@@ -20,12 +20,12 @@ const Header = ({ logOutFunc, onSearch }) => {
    
     const [clicked, setClicked] = useState(false);
     const [isFollowed, setIsFollowed] = useState();
-    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState(users);
     const handleFollow = (id) => {
-        dispatch(followUsers(id, currentUserData._id));
+        dispatch(followUsers(id, user._id));
     };
     const handleUnFollow = (id) => {
-        dispatch(unfollowUsers(id, currentUserData._id));
+        dispatch(unfollowUsers(id, user._id));
     };
 
     const handleChange = (event) => {
@@ -37,11 +37,12 @@ const Header = ({ logOutFunc, onSearch }) => {
         setClicked(!clicked);
     };
     useEffect(() => {
-     
+    
         dispatch(getUsers())
-    }, [dispatch]);
+       
+    },[dispatch] );
     const filterUsers = (query) => {
-        const filtered = users.user.filter((user) =>
+        const filtered = users.filter((user) =>
             user.username.toLowerCase().includes(query.toLowerCase())
         );
         setFilteredUsers(filtered);

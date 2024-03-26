@@ -13,21 +13,20 @@ import {
 const Profile = () => {
     const [isEdit, setIsEdit] = useState(false);
     const user =
-        useSelector((state) => state.user.user) ||
-        JSON.parse(localStorage.getItem('user'));
+        useSelector((state) => state.user.user)
 
     const followeduserdata = useSelector((state) => state.user.followingData);
     const [User, setUser] = useState({
-        username: user.user.username,
-        email: user.user.email,
-        bio: user.user.bio,
-        education: user.user.education,
-        linkedin: user.user.linkedin,
-        experience: user.user.experience,
-        profile: user.user.profile,
-        github: user.user.github,
-        connections: user.user.connection,
-        profilephoto: user.user.profilephoto,
+        username: user.username,
+        email: user.email,
+        bio: user.bio,
+        education: user.education,
+        linkedin: user.linkedin,
+        experience: user.experience,
+        profile: user.profile,
+        github: user.github,
+        connections: user.connection,
+        profilephoto: user.profilephoto,
     });
     const dispatch = useDispatch();
     const handleEdit = () => {
@@ -58,23 +57,21 @@ const Profile = () => {
             }
         });
     
-        dispatch(updateUser(user.user._id, formData));
-        dispatch(getUserDataById(user.user._id))
+        dispatch(updateUser(user._id, formData));
+        dispatch(getUserDataById(user._id))
         handleEdit();
     };
     
 
   
     const handleUnFollow = (id) => {
-        dispatch(unfollowUsers(id, user.user._id));
+        dispatch(unfollowUsers(id, user._id));
     };
 
     useEffect(() => {
-        dispatch(getFollowingData(user.user._id)); 
-       
+        dispatch(getFollowingData(user._id)); 
       
-      
-    }, [dispatch, followeduserdata,user]);
+    }, [dispatch, followeduserdata, user]);
 
     return (
         <div>
@@ -83,7 +80,7 @@ const Profile = () => {
                     <div className="avatar-wrapper">
                         <img
                             className="profile-photo"
-                            src={user.user.profilephoto}
+                            src={user.profilephoto}
                             alt="Profile"
                         />
                         <div className="upload-profile">
@@ -110,7 +107,7 @@ const Profile = () => {
                     </div>
                 </div>
                 <div className="user">
-                    <span id="username">{user.user.username}</span>
+                    <span id="username">{user.username}</span>
                     <span id="connections">
                         {followeduserdata.length} Connections
                     </span>
@@ -198,31 +195,31 @@ const Profile = () => {
                     <h2>Profile</h2>
                     <div className="field">
                         <span>UserName:</span>
-                        <span>{user.user.username}</span>
+                        <span>{user.username}</span>
                     </div>
                     <div className="field">
                         <span>Email:</span>
-                        <span>{user.user.email}</span>
+                        <span>{user.email}</span>
                     </div>
                     <div className="field">
                         <span>Experience:</span>
-                        <span>{user.user.experience}</span>
+                        <span>{user.experience}</span>
                     </div>
                     <div className="field">
                         <span>Bio:</span>
-                        <span>{user.user.bio}</span>
+                        <span>{user.bio}</span>
                     </div>
                     <div className="field">
                         <span>Education:</span>
-                        <span>{user.user.education}</span>
+                        <span>{user.education}</span>
                     </div>
                     <div className="field">
                         <span>Github:</span>
-                        <span>{user.user.github}</span>
+                        <span>{user.github}</span>
                     </div>
                     <div className="field">
                         <span>Linkedin:</span>
-                        <span>{user.user.linkedin}</span>
+                        <span>{user.linkedin}</span>
                     </div>
                 </div>
                 <div className="connection-container">

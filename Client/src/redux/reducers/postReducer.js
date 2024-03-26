@@ -1,7 +1,7 @@
 const initialState = {
     error: '',
     loading: false,
-    post: []
+    post: [],
 };
 const postReducer = (state = initialState, action) => {
     switch (action.type) {
@@ -11,12 +11,20 @@ const postReducer = (state = initialState, action) => {
                 loading: true,
             };
         case 'CREATE_POST_SUCCESS':
+            console.log(
+                'User received in reducer create post success',
+                action.payload
+            );
             return {
                 ...state,
                 loading: false,
-                post: action.payload
+                post: [...state.post, action.payload],
             };
         case 'CREATE_POST_FAIL':
+            console.log(
+                'User received in reducer create post fail',
+                action.payload
+            );
             return {
                 ...state,
                 loading: false,
@@ -35,6 +43,10 @@ const postReducer = (state = initialState, action) => {
                 post: action.payload,
             };
         case 'GET_POST_FAIL':
+            console.log(
+                'User received in reducer get post fail',
+                action.payload
+            );
             return {
                 ...state,
                 loading: false,
@@ -47,18 +59,29 @@ const postReducer = (state = initialState, action) => {
                 loading: true,
             };
         case 'UPDATE_POST_SUCCESS':
-            const { id, newData } = action.payload;
+            console.log(
+                'User received in reducer update post ',
+                action.payload
+            );
+            const updatedposts = state.post.map((post) => {
+                if (post._id === action.payload._id) {
+                    return action.payload;
+                } else {
+                    return post;
+                }
+            });
+
             return {
                 ...state,
                 loading: false,
-                post: state.post.map((post) => {
-                    if (post._id === id) {
-                        return { ...post, ...newData };
-                    }
-                    return post;
-                }),
+                post: updatedposts,
             };
+
         case 'UPDATE_POST_FAIL':
+            console.log(
+                'User received in reducer get comment fail:',
+                action.payload
+            );
             return {
                 ...state,
                 loading: false,
@@ -70,16 +93,26 @@ const postReducer = (state = initialState, action) => {
                 loading: true,
             };
         case 'COMMENT_POST_SUCCESS':
+            console.log(
+                'User received in reducer comment post ',
+                action.payload
+            );
             const updatedPost = action.payload;
-            const updatedPosts = state.post.map(post => post._id === updatedPost._id ? updatedPost : post);
+            const updatedPosts = state.post.map((post) =>
+                post._id === updatedPost._id ? updatedPost : post
+            );
             return {
-              ...state,
-              loading: false,
-              error: '',
-              posts: updatedPosts
+                ...state,
+                loading: false,
+                error: '',
+                posts: updatedPosts,
             };
 
         case 'COMMENT_POST_FAILURE':
+            console.log(
+                'User received in reducer get comment fail:',
+                action.payload
+            );
             return {
                 ...state,
                 loading: false,
@@ -91,7 +124,12 @@ const postReducer = (state = initialState, action) => {
                 loading: true,
             };
         case 'GET_COMMENTS_SUCCESS':
+            console.log(
+                'User received in reducer get comment posts:',
+                action.payload
+            );
             const post = action.payload;
+
             return {
                 ...state,
                 loading: false,
@@ -110,6 +148,10 @@ const postReducer = (state = initialState, action) => {
                 error: action.payload,
             };
         case 'DELETE_POST_SUCCESS':
+            console.log(
+                'User received in reducer get post posts:',
+                action.payload
+            );
             const postId = action.payload;
             return {
                 ...state,
@@ -127,16 +169,20 @@ const postReducer = (state = initialState, action) => {
                 loading: true,
             };
         case 'LIKE_POST_SUCCESS':
+            console.log(
+                'User received in reducer get like posts:',
+                action.payload
+            );
             return {
                 ...state,
                 loading: false,
-                post: action.payload
+                post: action.payload,
             };
         case 'LIKE_POST_FAILURE':
             return {
                 ...state,
                 loading: false,
-                error:action.payload
+                error: action.payload,
             };
         default:
             return state;

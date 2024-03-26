@@ -1,28 +1,22 @@
 // Connections.js
 import React, { useState, useEffect } from 'react';
 import '../Wrappers/dashboard.css';
-import {
-    getFollowingData,
-    unfollowUsers,
-    followUsers,
-} from '../redux/actions/user';
+import { getFollowingData, unfollowUsers } from '../redux/actions/user';
 import { useDispatch, useSelector } from 'react-redux';
 const Connections = () => {
     const [isFollow, setIsFollow] = useState(true);
     const followeduserdata = useSelector((state) => state.user.followingData);
 
     const dispatch = useDispatch();
-    const user =
-        useSelector((state) => state.user.user) ||
-        JSON.parse(localStorage.getItem('user'));
+    const user = useSelector((state) => state.user.user);
 
     useEffect(() => {
-        dispatch(getFollowingData(user.user._id));
-    }, [dispatch, followeduserdata, user]);
+        // dispatch(getFollowingData(user._id));
+        console.log(user, 'Follwoing ');
+    }, [dispatch, followeduserdata]);
 
-  
     const handleUnFollow = (id) => {
-        dispatch(unfollowUsers(id, user.user._id));
+        dispatch(unfollowUsers(id, user._id));
     };
 
     return (

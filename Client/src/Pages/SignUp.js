@@ -1,8 +1,8 @@
-// SignUp.js
+
 import React, { useState } from 'react';
-import '../Wrappers/signUp.css'; // Import your CSS file
-import { useDispatch} from 'react-redux';
-import {signUp,signUpUser} from '../redux/actions/user.js'
+import '../Wrappers/signUp.css'; 
+import { useDispatch,useSelector} from 'react-redux';
+import {signUpUser} from '../redux/actions/user.js'
 import { useNavigate } from 'react-router-dom';
 const SignUp = () => {
     const loginWithGoogle = () => {
@@ -11,7 +11,8 @@ const SignUp = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [user, setUser] = useState({ username: '', email: '', password: '' });
-
+    const userdata =useSelector((state) => state.user.user);
+ 
     const handleChange = (event) => {
         const { name, value } = event.target;
         setUser((prevData) => ({ ...prevData, [name]: value }));
@@ -19,8 +20,8 @@ const SignUp = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
         dispatch(signUpUser(user.email, user.password, user.username));
-        navigate('/dashboard');
-        console.log('succesffullyy signup');
+     
+    
     };
     return (
         <div className="signup">

@@ -32,7 +32,7 @@ const updateSchema = z.object({
     education: z.string().optional(),
     linkedin: z.string().optional(),
     github: z.string().optional(),
-    profilephoto:z.string().optional()
+    profilephoto: z.string().optional(),
 });
 const followuserSchema = z.object({
     currentUserId: z.string(),
@@ -199,12 +199,22 @@ const login = async (req, res) => {
         }
     }
 };
+const logout = async (req, res) => {
+    try {
+        res.clearCookie('token');
+        res.redirect('/login');
+    } catch (error) {
+        res.status(500).json({
+            message: 'Internal server error',
+            error: error.message,
+        });
+    }
+};
 const update = async (req, res) => {
     const { userId } = req.params;
-    const updatedFields = req.body;
-    let profile = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+    let updatedFields = req.body;
+    let profile = '';
 
-   
     if (req.file && req.file.path) {
         profile = req.file.path;
     }
@@ -212,8 +222,10 @@ const update = async (req, res) => {
     updatedFields = { ...updatedFields, profilephoto: profile };
     try {
         updateSchema.parse(updatedFields);
-      
-        const user = await User.findByIdAndUpdate(userId, updatedFields,{new: true});
+
+        const user = await User.findByIdAndUpdate(userId, updatedFields, {
+            new: true,
+        });
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
@@ -241,12 +253,15 @@ const getUserById = async (req, res) => {
     const { id } = req.params;
     try {
         const user = await User.findById(id);
-        res.status(200).json({ message: 'Fetch User Success!!', user });
+        if (!user) {
+            return res.status(404).json({ message: 'User Not Found' });
+        }
+        return res.status(200).json({ message: 'Fetch User Success!!', user });
     } catch (error) {
         if (error instanceof z.ZodError) {
-            res.status(400).json({ message: 'Validation error' });
+            return res.status(400).json({ message: 'Validation error' });
         } else {
-            res.status(500).json({
+            return res.status(500).json({
                 message: 'Internal Server error',
                 error: error.message,
             });
@@ -279,7 +294,9 @@ const followUser = async (req, res) => {
                 }
                 res.status(200).json({ message: 'User Followed', user });
             } else {
-                res.status(403).json({message:"User is Already followed by you"});
+                res.status(403).json({
+                    message: 'User is Already followed by you',
+                });
             }
         } catch (error) {
             if (error instanceof z.ZodError) {
@@ -324,7 +341,9 @@ const unfollowUser = async (req, res) => {
                     user,
                 });
             } else {
-                res.status(404).json({message:"User is not followed by you"});
+                res.status(404).json({
+                    message: 'User is not followed by you',
+                });
             }
         } catch (error) {
             if (error instanceof z.ZodError) {
@@ -427,7 +446,6 @@ const getSavedPost = async (req, res) => {
 };
 
 const getAllUsers = async (req, res) => {
-    const { currentuserid } = req.params;
     try {
         const user = await User.find();
 
@@ -452,6 +470,6 @@ module.exports = {
     getSavedPost,
     getFollowingUserData,
     getUserById,
-    profilePhoto
-    
+    profilePhoto,
+    logout,
 };
