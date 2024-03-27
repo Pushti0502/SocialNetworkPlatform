@@ -13,7 +13,7 @@ const SavedPost = () => {
     const savedPosts = useSelector((state) => state.user.savedPosts);
     const dispatch = useDispatch();
     const handleUnSave = (id) => {
-        dispatch(saveUnsavePost(id, user.user._id));
+        dispatch(saveUnsavePost(id, user._id));
     };
 
     useEffect(() => {
@@ -43,7 +43,7 @@ const SavedPost = () => {
                                             alt=""
                                             className="profile-picture"
                                         />
-                                        <span>{user.user.username}</span>
+                                        <span>{user.username}</span>
                                     </div>
                                     <button
                                         onClick={() => handleUnSave(item._id)}

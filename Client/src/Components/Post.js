@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { CiHeart, CiSaveDown2 } from 'react-icons/ci';
 import { FaHeart, FaRegComment } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios'
 import '../Wrappers/dashboard.css';
 import {
     commentPost,
@@ -12,10 +13,10 @@ import {
     likePost,
     updatePost,
 } from '../redux/actions/post';
-import { saveUnsavePost,getUserDataById } from '../redux/actions/user';
+import { saveUnsavePost, getUserDataById } from '../redux/actions/user';
 const Posts = () => {
     const dispatch = useDispatch();
-    const user =useSelector((state) => state.user.user);
+    const user = useSelector((state) => state.user.user);
 
     const [postData, setPostData] = useState({
         title: '',
@@ -33,17 +34,13 @@ const Posts = () => {
     const [isComment, setIsComment] = useState(false);
     const [comment, setComment] = useState();
     useEffect(() => {
-     if(user && user._id ){
-
-        dispatch(getPostById(user._id))
-     }
-     
-       
-    }, [dispatch,postdata,user]);
+        if (user && user._id) {
+            dispatch(getPostById(user._id));
+        }
+    }, [dispatch, postdata, user]);
     const handleChange = (event) => {
         const { name, value } = event.target;
         setPostData((prevData) => ({ ...prevData, [name]: value }));
-        console.log(postData)
     };
     const handleEditChange = (event) => {
         const { name, value } = event.target;
@@ -88,20 +85,47 @@ const Posts = () => {
     const handlePostSave = (id) => {
         dispatch(saveUnsavePost(id, user._id));
     };
-
-    const handleFileChange = async (event) => {
-        const file = event.target.files[0];
-        const url = URL.createObjectURL(file);
-        setPostData((prevData) => ({ ...prevData, selectedFile: url }));
-        console.log(postData.selectedFile);
+    const handleFileChange = (event) => {
+        const { files } = event.target;
+        if (files.length > 0) {
+            const file = files[0];
+            const fileName = `uploads/${Date.now()}-${file.name}`;
+            console.log(fileName, "FilePath");
+            setPostData({
+                ...postData,
+                selectedFile: fileName,
+            });
+        } else {
+            setPostData({
+                ...postData,
+                selectedFile: '',
+            });
+        }
     };
-
-    const handleUpload = () => {
-        dispatch(createPost(postData));
-      
-        handlePost(); 
-        setPostData({ title: '', content: '', selectedFile:'' });
+    
+    
+    
+    const handleUpload = async () => {
+        try {
+            const formData = new FormData();
+            formData.append('title', postData.title);
+            formData.append('content', postData.content);
+            formData.append('createdBy', user._id );
+            console.log(postData.selectedFile,"selectedFile")
+           
+            formData.append('selectedFile', postData.selectedFile);
+          
+           dispatch(createPost(formData))
+    
+     
+            handlePost();
+            setPostData({ title: '', content: '', selectedFile: '' });
+        } catch (error) {
+            console.error('Error uploading post:', error);
+          
+        }
     };
+    
     const handledelete = (PostId) => {
         dispatch(deletePost(PostId));
     };
@@ -192,9 +216,7 @@ const Posts = () => {
                                                     alt=""
                                                     className="profile-picture"
                                                 />
-                                                <span>
-                                                    {user.username}
-                                                </span>
+                                                <span>{user.username}</span>
                                             </div>
                                             <div className="button-container">
                                                 <button
@@ -295,16 +317,16 @@ const Posts = () => {
                                             {item.content}
                                         </span>
                                         {item.selectedFile && (
-                            <img
-                                src={`http://localhost:8000/${item.selectedFile}`}
-                                alt=""
-                                className="post-image"
-                            />
-                        )}
+                                            <img
+                                                src={`http://localhost:8000/${item.selectedFile}`}
+                                                alt=""
+                                                className="post-image"
+                                            />
+                                        )}
                                         <div className="like-container">
                                             <div className="likes">
                                                 {item.likes.includes(
-                                                user._id
+                                                    user._id
                                                 ) ? (
                                                     <FaHeart
                                                         size={20}

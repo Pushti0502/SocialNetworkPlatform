@@ -12,7 +12,7 @@ const Connections = () => {
 
     useEffect(() => {
         // dispatch(getFollowingData(user._id));
-        console.log(user, 'Follwoing ');
+    
     }, [dispatch, followeduserdata]);
 
     const handleUnFollow = (id) => {

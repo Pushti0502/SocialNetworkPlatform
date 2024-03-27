@@ -23,7 +23,6 @@ const Profile = () => {
         education: user.education,
         linkedin: user.linkedin,
         experience: user.experience,
-        profile: user.profile,
         github: user.github,
         connections: user.connection,
         profilephoto: user.profilephoto,
@@ -34,6 +33,9 @@ const Profile = () => {
     };
 
     const handleChange = (event) => {
+        console.log('Event target:', event.target);
+        console.log('Files:', event.target.files);
+    
         if (event.target.name === 'profilephoto') {
             setUser((prevData) => ({
                 ...prevData,
@@ -44,12 +46,13 @@ const Profile = () => {
             setUser((prevData) => ({ ...prevData, [name]: value }));
         }
     };
+    
 
     const handleSubmit = (event) => {
         event.preventDefault();
     
         const formData = new FormData();
-        Object.entries(user).forEach(([key, value]) => {
+        Object.entries(User).forEach(([key, value]) => {
             if (key === 'profilephoto' && event.target.profilephoto.files.length > 0) {
                 formData.append(key, event.target.profilephoto.files[0]);
             } else if (key !== 'profilephoto') {
@@ -58,9 +61,10 @@ const Profile = () => {
         });
     
         dispatch(updateUser(user._id, formData));
-        dispatch(getUserDataById(user._id))
+        dispatch(getUserDataById(user._id));
         handleEdit();
     };
+    
     
 
   
@@ -91,7 +95,7 @@ const Profile = () => {
                             />
                             <input
                                 type="file"
-                                accept="image/*"
+                               
                                 style={{
                                     position: 'absolute',
                                     top: 0,
@@ -112,9 +116,10 @@ const Profile = () => {
                         {followeduserdata.length} Connections
                     </span>
                 </div>
-                <button onClick={handleEdit}>Edit</button>
+                <button onClick={handleEdit} className='save-button'>Edit</button>
                 {isEdit && (
                     <div className="edit-container">
+                         <button className="close-button" onClick={() => setIsEdit(false)}>X</button>
                         <div className="user-details">
                             <h2>Profile</h2>
                             <div className="field">
@@ -183,7 +188,7 @@ const Profile = () => {
                                     onChange={handleChange}
                                 />
                             </div>
-                            <button onClick={handleSubmit}>Save</button>
+                            <button onClick={handleSubmit} className='save-button'>Save</button>
                         </div>
 
                         <div className="background-overlay"></div>

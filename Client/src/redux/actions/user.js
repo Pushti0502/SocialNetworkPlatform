@@ -102,7 +102,12 @@ export const signUpUser =
            
         } catch (error) {
             console.log('SignUp error:', error);
-            alert('Signup failed. Please try again.');
+            if (error.response && error.response.status === 409) {
+                alert('Email already exists. Please use a different email.');
+            } else {
+                console.log('SignUp error:', error);
+                alert('Signup failed. Please try again.');
+            }
         }
     };
 export const logInUser = (email, password) => async (dispatch) => {
@@ -116,7 +121,12 @@ export const logInUser = (email, password) => async (dispatch) => {
         dispatch(logIn(user));
      
     } catch (error) {
-        console.log(error);
+        if (error.response && error.response.status === 401) {
+            alert('Invalid email or password.');
+        } else {
+            console.log(error);
+            alert('Login failed. Please try again.');
+        }
     }
 };
 export const updateUser = (userId, updatedFields) => async (dispatch) => {
@@ -199,7 +209,7 @@ export const saveUnsavePost = (id, userId) => async (dispatch) => {
     } catch (error) {
         console.log(error.message);
 
-        alert('Fail to save Post');
+        alert('Fail to save/unsave Post');
     }
 };
 export const getSavedPost = (userId) => async (dispatch) => {

@@ -23,11 +23,9 @@ const Header = ({ logOutFunc, onSearch }) => {
     const [filteredUsers, setFilteredUsers] = useState(users);
     const handleFollow = (id) => {
         dispatch(followUsers(id, user._id));
+        setFilteredUsers(filteredUsers.filter((u) => u._id !== id));
     };
-    const handleUnFollow = (id) => {
-        dispatch(unfollowUsers(id, user._id));
-    };
-
+   
     const handleChange = (event) => {
         setSearchquery(event.target.value);
         filterUsers(event.target.value);
@@ -65,6 +63,7 @@ const Header = ({ logOutFunc, onSearch }) => {
             </div>
             {clicked && (
                 <div className="user-container">
+                     <span className="close-user-icon" onClick={() => setClicked(false)}>X</span>
                     {filteredUsers.map((user, index) => {
                         return (
                             <div key={index} className="user-list-card">

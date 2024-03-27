@@ -123,6 +123,7 @@ export const createPost = (postData) => {
               
             const newPost = response.data.post;
             dispatch(createSuccess(newPost));
+            console.log(postData,"PostData")
         } catch (error) {
             const errorMessage = error.message;
             dispatch(createFail(errorMessage));
@@ -187,7 +188,7 @@ export const getComments = (id) => {
             const response = await axios.get(
                 `${BASE_URL}/post/${id}/getComments`
             );
-            const comments = response.data;
+            const comments = response.data.comments;
             dispatch(getCommentsSuccess(comments));
         } catch (error) {
             const errormessage = error.message;
@@ -211,11 +212,9 @@ export const likePost = (userId, id) => {
     return async (dispatch) => {
         dispatch(likePostReq());
         try {
-            await axios.patch(`${BASE_URL}/post/${userId}/likePost/${id}`);
-            const response= await axios.get(
-                `${BASE_URL}/user/${userId}/getfollowinguser`
-            );
-            dispatch(likePostSuccess(response.data));
+          
+            const response=   await axios.patch(`${BASE_URL}/post/${userId}/likePost/${id}`);
+            dispatch(likePostSuccess(response.data.post));
             alert('Operation success!!');
         } catch (error) {
             const errormessage = error.message;

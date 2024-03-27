@@ -10,19 +10,26 @@ const SignUp = () => {
     };
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [signUpSuccess, setSignUpSuccess] = useState(false); 
     const [user, setUser] = useState({ username: '', email: '', password: '' });
-    const userdata =useSelector((state) => state.user.user);
- 
+    const userData = useSelector((state) => state.user.user);
+
     const handleChange = (event) => {
         const { name, value } = event.target;
         setUser((prevData) => ({ ...prevData, [name]: value }));
     };
-    const handleSubmit = (event) => {
+
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        dispatch(signUpUser(user.email, user.password, user.username));
-     
-    
+        await dispatch(signUpUser(user.email, user.password, user.username));
+        if (userData) {
+            setSignUpSuccess(true);
+        }
     };
+
+    if (signUpSuccess) {
+        navigate('/dashboard');
+    }
     return (
         <div className="signup">
             <h1>Sign Up to CodeQuest</h1>
